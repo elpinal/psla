@@ -1,0 +1,11 @@
+OASISFormat: 0.4
+Name:        Psla
+Version:     0.0.1
+Synopsis:    This package manages Versions of Python.
+Authors:     El Pin Al
+License:     MIT
+Plugins:     META (0.4), DevFiles (0.4)
+Executable psla
+  Path:       src
+  BuildTools: ocamlbuild
+  MainIs:     psla.ml

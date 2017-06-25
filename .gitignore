@@ -1,0 +1,12 @@
+_build/
+
+*.byte
+*.native
+
+setup.data
+setup.log
+
+META
+
+*.mllib
+*.mldylib
