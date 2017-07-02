@@ -3,6 +3,7 @@ module Lib
     ) where
 
 import Control.Applicative
+import Control.Exception.Safe
 import Control.Monad
 import Data.Maybe
 import System.Directory
@@ -10,6 +11,7 @@ import System.Environment
 import System.Exit
 import System.FilePath
 import System.IO
+import System.IO.Error
 import System.Process
 
 repoURI :: String
@@ -146,4 +148,4 @@ uninstall :: [String] -> IO ()
 uninstall [] = hPutStrLn stderr "usage: psla uninstall versions..." >> exitFailure
 uninstall versions = do
   root <- rootPath
-  forM_ versions (\v -> mapM_ (\dir -> removeDirectoryRecursive $ root </> dir </> v) ["repo", "python"])
+  forM_ versions (\v -> mapM_ (\dir -> ( removeDirectoryRecursive  $ root  </> dir  </> v ) `catch` (\e -> unless ( isDoesNotExistError  e ) $ throw e)) ["repo", "python", "frameworks", "user"])
