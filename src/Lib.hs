@@ -28,6 +28,7 @@ parseArgs ("help":args) = help args
 parseArgs ("install":args) = install args
 parseArgs ("use":args) = use args
 parseArgs ("list":args) = list args
+parseArgs ("uninstall":args) = uninstall args
 parseArgs (x:_) = do
   hPutStrLn stderr $ "psla: no such command " ++ show x
   exitFailure
@@ -115,3 +116,9 @@ list [] = do
           dirs <- listDirectory $ root </> "python"
           mapM_ putStrLn dirs
 list _ = hPutStrLn stderr "usage: list" >> exitFailure
+
+uninstall :: [String] -> IO ()
+uninstall [] = hPutStrLn stderr "usage: psla uninstall versions..." >> exitFailure
+uninstall versions = do
+  root <- rootPath
+  forM_ versions (\v -> mapM_ (\dir -> removeDirectoryRecursive $ root </> dir </> v) ["repo", "python"])
