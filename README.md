@@ -28,10 +28,22 @@ To set the specific version of Python as the current version:
 $ psla use v3.6.0
 ```
 
+To list up the installed versions of Python:
+
+```bash
+$ psla list
+```
+
 To uninstall the specific version of Python:
 
 ```bash
 $ psla uninstall v3.6.0
+```
+
+For more information:
+
+```bash
+$ psla help
 ```
 
 ## Motivation
