@@ -62,12 +62,28 @@ help _ = do
                               ]
          exitFailure
 
+data Flag = Flag String String
+
+flagToTuple :: Flag -> (String, String)
+flagToTuple (Flag name value) = (name, value)
+
+installFlags :: String -> Maybe (String  -> Flag)
+installFlags "-config" = Just $ Flag "config"
+installFlags _ = Nothing
+
+parseFlag :: (String -> Maybe (String  -> Flag)) -> [String] -> [Flag] -> ([Flag], [String])
+parseFlag f args@(x:y:ys) flags = case f x of
+                                       Just g -> parseFlag f ys (g y : flags)
+                                       Nothing -> (flags, args)
+parseFlag _ args flags = (flags, args)
+
 install :: [String] -> IO ()
 install [] = hPutStrLn stderr "install: 1 or more arguments required" >> exitFailure
-install versions = do
+install args = do
+        let (flags, versions) = parseFlag installFlags args []
         _ <- createDirectoryIfMissing True <$> (combine <$> rootPath <*> return "repo")
         mapM_ clone versions
-        mapM_ build versions
+        mapM_ ( build flags ) versions
 
 clone :: String -> IO ()
 clone version = do
@@ -76,11 +92,11 @@ clone version = do
   when doesNotExists $
        callProcess "git" ["clone", "--depth", "1", "--branch", version, repoURI, dest]
 
-build :: String -> IO ()
-build version = do
+build :: [Flag] -> String -> IO ()
+build flags version = do
   root <- rootPath
   let dest = foldl1 combine [root, "repo", version]
-  forM_ [ (dest </> "configure", ["--prefix", foldl1 combine [root, "python", version]])
+  forM_ [ (dest </> "configure", configOpt ++ ["--prefix", foldl1 combine [root, "python", version]])
         , ("make", ["-k", "-j4"])
         , ("make", ["install"])
         ]
@@ -90,6 +106,8 @@ build version = do
         when (code  /= ExitSuccess)
              exitFailure
         )
+  where
+       configOpt = map snd $ filter (\(name, _) -> name == "config") $ map flagToTuple flags
 
 use :: [String] -> IO ()
 use [] = hPutStrLn stderr "use: 1 argument required" >> exitFailure
