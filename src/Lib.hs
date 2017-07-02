@@ -134,7 +134,7 @@ use _ = hPutStrLn stderr "use: too many arguments" >> exitFailure
 script :: String -> String -> String
 script root version = unlines [ "#!/bin/sh"
                               , ""
-                              , "export PYTHONUSERBASE=" ++ show ( root </> "user" )
+                              , "export PYTHONUSERBASE=" ++ show ( root </> "user" </> version )
                               , show ( root  </> "python"  </> version  </> "bin"  </> "python3" ) ++ " \"$@\""]
 
 list :: [String] -> IO ()
