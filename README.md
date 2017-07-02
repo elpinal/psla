@@ -24,6 +24,12 @@ To install the specific version of Python:
 $ psla install v3.6.0
 ```
 
+To install with frameworks on Mac:
+
+```bash
+$ psla install -framework true v3.6.0
+```
+
 To set the specific version of Python as the current version:
 
 ```bash
