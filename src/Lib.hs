@@ -6,6 +6,7 @@ import Control.Applicative
 import Control.Monad
 import System.Directory
 import System.Environment
+import System.Exit
 import System.FilePath
 import System.IO
 import System.Process
@@ -22,9 +23,11 @@ run = do
   parseArgs args
 
 parseArgs :: [String] -> IO ()
-parseArgs [] = putStrLn usage
+parseArgs [] = putStrLn usage >> exitFailure
 parseArgs ("install":args) = install args
-parseArgs (x:_) = hPutStrLn stderr $ "psla: no such command " ++ show x
+parseArgs (x:_) = do
+  hPutStrLn stderr $ "psla: no such command " ++ show x
+  exitFailure
 
 usage :: String
 usage = foldl1 (\a b -> a ++ "\n" ++ b)
@@ -39,7 +42,7 @@ usage = foldl1 (\a b -> a ++ "\n" ++ b)
                ]
 
 install :: [String] -> IO ()
-install [] = hPutStrLn stderr "install: 1 or more arguments required"
+install [] = hPutStrLn stderr "install: 1 or more arguments required" >> exitFailure
 install versions = do
         _ <- createDirectoryIfMissing True <$> (combine <$> rootPath <*> return "repo")
         mapM_ clone versions
@@ -62,5 +65,7 @@ build version = do
         ]
         (\(cmd, args) -> do
         (_,_,_,ph) <- createProcess (proc cmd args){ cwd = Just dest }
-        void $ waitForProcess ph
+        code <- waitForProcess ph
+        when (code  /= ExitSuccess)
+             exitFailure
         )
