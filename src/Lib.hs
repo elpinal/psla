@@ -27,7 +27,16 @@ parseArgs ("install":args) = install args
 parseArgs (x:_) = hPutStrLn stderr $ "psla: no such command " ++ show x
 
 usage :: String
-usage = "PSLA is a tool for managing Python environment."
+usage = foldl1 (\a b -> a ++ "\n" ++ b)
+               [ "PSLA is a tool for managing Python environment."
+               , ""
+               , "Usage:"
+               , ""
+               , "        install      download and compile the specific version of Python"
+               , "        uninstall    uninstall the specific version of Python"
+               , "        use          select the specific version of Python as cureent version"
+               , ""
+               ]
 
 install :: [String] -> IO ()
 install [] = hPutStrLn stderr "install: 1 or more arguments required"
