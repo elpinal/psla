@@ -1,5 +1,5 @@
 module Lib
-    ( someFunc
+    ( run
     ) where
 
 import Control.Applicative
@@ -16,8 +16,8 @@ repoURI = "https://github.com/python/cpython"
 rootPath :: IO FilePath
 rootPath = combine <$> getHomeDirectory <*> return ".psla"
 
-someFunc :: IO ()
-someFunc = do
+run :: IO ()
+run = do
   args <-getArgs
   parseArgs args
 
