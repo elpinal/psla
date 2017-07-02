@@ -4,6 +4,7 @@ module Lib
 
 import Control.Applicative
 import Control.Monad
+import Data.Maybe
 import System.Directory
 import System.Environment
 import System.Exit
@@ -62,13 +63,14 @@ help _ = do
                               ]
          exitFailure
 
-data Flag = Flag String String
+data Flag = Flag String String deriving Show
 
 flagToTuple :: Flag -> (String, String)
 flagToTuple (Flag name value) = (name, value)
 
 installFlags :: String -> Maybe (String  -> Flag)
 installFlags "-config" = Just $ Flag "config"
+installFlags "-framework" = Just $ Flag "framework"
 installFlags _ = Nothing
 
 parseFlag :: (String -> Maybe (String  -> Flag)) -> [String] -> [Flag] -> ([Flag], [String])
@@ -96,7 +98,7 @@ build :: [Flag] -> String -> IO ()
 build flags version = do
   root <- rootPath
   let dest = foldl1 combine [root, "repo", version]
-  forM_ [ (dest </> "configure", configOpt ++ ["--prefix", foldl1 combine [root, "python", version]])
+  forM_ [ (dest </> "configure", configOpt ++ frameworkOpt root ++ ["--prefix", foldl1 combine [root, "python", version]])
         , ("make", ["-k", "-j4"])
         , ("make", ["install"])
         ]
@@ -108,6 +110,10 @@ build flags version = do
         )
   where
        configOpt = map snd $ filter (\(name, _) -> name == "config") $ map flagToTuple flags
+       frameworkOpt root = (<$) ( "--enable-framework=" ++ ( root </> "frameworks" </> version ) ) $
+                           maybeToList $
+                           lookup "framework" $
+                           map flagToTuple flags
 
 use :: [String] -> IO ()
 use [] = hPutStrLn stderr "use: 1 argument required" >> exitFailure
