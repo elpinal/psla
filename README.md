@@ -14,6 +14,8 @@ In this repository, use the following command:
 $ stack install
 ```
 
+Add `~/.psla/bin` to your `$PATH` for access to the `python` command. 
+
 ## Usage
 
 To install the specific version of Python:
