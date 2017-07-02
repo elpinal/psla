@@ -25,6 +25,7 @@ run = do
 parseArgs :: [String] -> IO ()
 parseArgs [] = putStrLn usage >> exitFailure
 parseArgs ("install":args) = install args
+parseArgs ("use":args) = use args
 parseArgs (x:_) = do
   hPutStrLn stderr $ "psla: no such command " ++ show x
   exitFailure
@@ -69,3 +70,20 @@ build version = do
         when (code  /= ExitSuccess)
              exitFailure
         )
+
+use :: [String] -> IO ()
+use [] = hPutStrLn stderr "use: 1 argument required" >> exitFailure
+use [version] = do
+  root <- rootPath
+  createDirectoryIfMissing True $ root </> "bin"
+  let dest = root  </> "bin"  </> "python"
+  writeFile dest $ script root version
+  perm <- getPermissions dest
+  setPermissions dest $ setOwnerExecutable True perm
+use _ = hPutStrLn stderr "use: too many arguments" >> exitFailure
+
+script :: String -> String -> String
+script root version = unlines [ "#!/bin/sh"
+                              , ""
+                              , "export PYTHONUSERBASE=" ++ show ( root </> "user" )
+                              , show ( root  </> "python"  </> version  </> "bin"  </> "python3" ) ++ " \"$@\""]
