@@ -24,6 +24,7 @@ run = do
 
 parseArgs :: [String] -> IO ()
 parseArgs [] = putStrLn usage >> exitFailure
+parseArgs ("help":args) = help args
 parseArgs ("install":args) = install args
 parseArgs ("use":args) = use args
 parseArgs ("list":args) = list args
@@ -42,6 +43,21 @@ usage = unlines
           , "        use          select the specific version of Python as cureent version"
           , ""
           ]
+
+help :: [String] -> IO ()
+help [] = putStrLn usage
+help ["install"] = putStrLn "usage: psla install versions..."
+help ["use"] = putStrLn "usage: psla use version"
+help ["list"] = putStrLn "usage: psla list"
+help [topic] = do
+  hPutStrLn stderr $ "unknown help topic " ++ show topic ++ ". Run 'psla help'."
+  exitFailure
+help _ = do
+         putStrLn . unlines $ [ "usage: psla help command"
+                              , ""
+                              , "Too many arguments given."
+                              ]
+         exitFailure
 
 install :: [String] -> IO ()
 install [] = hPutStrLn stderr "install: 1 or more arguments required" >> exitFailure
