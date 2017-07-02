@@ -26,6 +26,7 @@ parseArgs :: [String] -> IO ()
 parseArgs [] = putStrLn usage >> exitFailure
 parseArgs ("install":args) = install args
 parseArgs ("use":args) = use args
+parseArgs ("list":args) = list args
 parseArgs (x:_) = do
   hPutStrLn stderr $ "psla: no such command " ++ show x
   exitFailure
@@ -90,3 +91,10 @@ script root version = unlines [ "#!/bin/sh"
                               , ""
                               , "export PYTHONUSERBASE=" ++ show ( root </> "user" )
                               , show ( root  </> "python"  </> version  </> "bin"  </> "python3" ) ++ " \"$@\""]
+
+list :: [String] -> IO ()
+list [] = do
+          root <- rootPath
+          dirs <- listDirectory $ root </> "python"
+          mapM_ putStrLn dirs
+list _ = hPutStrLn stderr "usage: list" >> exitFailure
