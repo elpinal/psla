@@ -75,6 +75,9 @@ use :: [String] -> IO ()
 use [] = hPutStrLn stderr "use: 1 argument required" >> exitFailure
 use [version] = do
   root <- rootPath
+  exists <- doesFileExist $ root </> "python" </> version </> "bin" </> "python3"
+  unless exists $
+         hPutStrLn stderr ( "use: not installed: " ++ show version ) >> exitFailure
   createDirectoryIfMissing True $ root </> "bin"
   let dest = root  </> "bin"  </> "python"
   writeFile dest $ script root version
