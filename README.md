@@ -19,19 +19,19 @@ $ stack install
 To install the specific version of Python:
 
 ```bash
-$ psla install python3.7
+$ psla install v3.6.0
 ```
 
 To set the specific version of Python as the current version:
 
 ```bash
-$ psla use python3.7
+$ psla use v3.6.0
 ```
 
 To uninstall the specific version of Python:
 
 ```bash
-$ psla uninstall python3.7
+$ psla uninstall v3.6.0
 ```
 
 ## Motivation
