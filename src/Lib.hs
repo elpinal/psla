@@ -148,4 +148,7 @@ uninstall :: [String] -> IO ()
 uninstall [] = hPutStrLn stderr "usage: psla uninstall versions..." >> exitFailure
 uninstall versions = do
   root <- rootPath
-  forM_ versions (\v -> mapM_ (\dir -> ( removeDirectoryRecursive  $ root  </> dir  </> v ) `catch` (\e -> unless ( isDoesNotExistError  e ) $ throw e)) ["repo", "python", "frameworks", "user"])
+  forM_ versions (\v -> forM_ ["repo", "python", "frameworks", "user"]
+                              (\dir -> removeDirectoryRecursive ( root  </> dir  </> v )
+                                       `catch`
+                                       (\e -> unless ( isDoesNotExistError  e ) $ throw e)))
