@@ -1,4 +1,4 @@
-# Psla
+# Psla: Python Situated in a Limited Area
 
 `Psla` is a tool for managing python environment.
 
@@ -22,7 +22,7 @@ To install the specific version of Python:
 $ psla install python3.7
 ```
 
-To set the specific version of Python as the current version.
+To set the specific version of Python as the current version:
 
 ```bash
 $ psla use python3.7
