@@ -174,8 +174,11 @@ list _ = fail "usage: list"
 uninstall :: [String] -> IO ()
 uninstall [] = fail "usage: psla uninstall versions..."
 uninstall versions = do
-  root <- getRootPath
-  forM_ versions (\v -> forM_ ["repo", "python", "frameworks", "user"]
-                              (\dir -> removeDirectoryRecursive ( root  </> dir  </> v )
-                                       `catch`
-                                       (\e -> unless ( isDoesNotExistError  e ) $ throw e)))
+  mapM_ remove versions
+    where
+      remove v = mapM_ (removeDirs v) ["repo", "python", "frameworks", "user"]
+      removeDirs v dir = do
+        root <- getRootPath
+        removeDirectoryRecursive (root </> dir </> v)
+          `catch` \e -> unless (isDoesNotExistError e)
+                               (throw e)
