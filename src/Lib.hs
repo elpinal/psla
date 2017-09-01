@@ -2,7 +2,6 @@ module Lib
     ( run
     ) where
 
-import Control.Applicative
 import Control.Exception.Safe
 import Control.Monad
 import Control.Monad.State.Lazy
