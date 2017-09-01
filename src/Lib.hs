@@ -127,21 +127,20 @@ build flags version = do
         , ("make", ["-k", "-j4"])
         , ("make", ["install"])
         ]
-  where
-       getConfig (Config x) = Just x
-       getConfig _ = Nothing
-       configOpt = mapMaybe getConfig flags
-       frameworkOpt root =
-         if Framework `elem` flags then
-           [("--enable-framework=" ++ (root </> "frameworks" </> version))]
-         else
-           []
-       exec dest (cmd, args) = do
-         (_, _, _, ph) <- createProcess (proc cmd args){ cwd = Just dest }
-         code <- waitForProcess ph
-         when (code /= ExitSuccess)
-              exitFailure
-        
+    where
+      getConfig (Config x) = Just x
+      getConfig _ = Nothing
+      configOpt = mapMaybe getConfig flags
+      frameworkOpt root =
+        if Framework `elem` flags then
+          [("--enable-framework=" ++ (root </> "frameworks" </> version))]
+        else
+          []
+      exec dest (cmd, args) = do
+        (_, _, _, ph) <- createProcess (proc cmd args){ cwd = Just dest }
+        code <- waitForProcess ph
+        when (code /= ExitSuccess)
+             exitFailure
 
 use :: [String] -> IO ()
 use [] = fail "use: 1 argument required"
