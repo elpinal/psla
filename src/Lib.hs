@@ -125,10 +125,9 @@ build flags version = do
                exitFailure
         )
   where
-       isConfig (Config _) = True
-       isConfig _ = False
-       fromConfig (Config x) = x
-       configOpt = map fromConfig $ filter isConfig flags
+       getConfig (Config x) = Just x
+       getConfig _ = Nothing
+       configOpt = mapMaybe getConfig flags
        frameworkOpt root =
          if Framework `elem` flags then
            [("--enable-framework=" ++ (root </> "frameworks" </> version))]
