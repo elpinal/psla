@@ -109,7 +109,8 @@ install args = do
 
 clone :: String -> IO ()
 clone version = do
-  dest <- foldl1 (liftA2 combine) [getRootPath, return "repo", return version]
+  root <- getRootPath
+  let dest = foldl1 combine [root, "repo", version]
   doesNotExists <- not <$> doesDirectoryExist dest
   when doesNotExists $
        callProcess "git" ["clone", "--depth", "1", "--branch", version, repoURI, dest]
