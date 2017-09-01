@@ -5,6 +5,7 @@ module Lib
 import Control.Applicative
 import Control.Exception.Safe
 import Control.Monad
+import Control.Monad.State.Lazy
 import Data.Maybe
 import System.Directory
 import System.Environment
@@ -65,26 +66,36 @@ help _ = do
                               ]
          exitFailure
 
-data Flag = Flag String String deriving Show
+data Flag =
+    Config String
+  | Framework
+    deriving Show
 
-flagToTuple :: Flag -> (String, String)
-flagToTuple (Flag name value) = (name, value)
+installFlags :: State [String] (Maybe Flag)
+installFlags = do
+  x : xs <- get
+  case x of
+    "-config" -> do
+      put $ tail xs
+      return $ return $ Config $ head xs
+    "-framework" -> do
+      put xs
+      return $ return Framework
+installFlags = return Nothing
 
-installFlags :: String -> Maybe (String  -> Flag)
-installFlags "-config" = Just $ Flag "config"
-installFlags "-framework" = Just $ Flag "framework"
-installFlags _ = Nothing
-
-parseFlag :: (String -> Maybe (String  -> Flag)) -> [String] -> [Flag] -> ([Flag], [String])
-parseFlag f args@(x:y:ys) flags = case f x of
-                                       Just g -> parseFlag f ys (g y : flags)
-                                       Nothing -> (flags, args)
-parseFlag _ args flags = (flags, args)
+parseFlag :: State [String] (Maybe Flag) -> State [String] [Flag]
+parseFlag s = do
+  flag <- s
+  case flag of
+    Just x -> do
+      xs <- parseFlag s
+      return $ x:xs
+    Nothing -> parseFlag s
 
 install :: [String] -> IO ()
 install [] = hPutStrLn stderr "install: 1 or more arguments required" >> exitFailure
 install args = do
-        let (flags, versions) = parseFlag installFlags args []
+        (flags, versions) <- runState $ parseFlag installFlags args
         _ <- createDirectoryIfMissing True <$> (combine <$> rootPath <*> return "repo")
         mapM_ clone versions
         mapM_ ( build flags ) versions
@@ -111,11 +122,14 @@ build flags version = do
              exitFailure
         )
   where
-       configOpt = map snd $ filter (\(name, _) -> name == "config") $ map flagToTuple flags
-       frameworkOpt root = (<$) ( "--enable-framework=" ++ ( root </> "frameworks" </> version ) ) $
-                           maybeToList $
-                           lookup "framework" $
-                           map flagToTuple flags
+       isConfig (Config _) = True
+       isConfig _ = False
+       fromConfig (Config x) = x
+       configOpt = map fromConfig $ filter isConfig flags
+       frameworkOpt root = if Framework `elem` flags then
+                             [( "--enable-framework=" ++ ( root </> "frameworks" </> version ) )]
+                           else
+                             []
 
 use :: [String] -> IO ()
 use [] = hPutStrLn stderr "use: 1 argument required" >> exitFailure
