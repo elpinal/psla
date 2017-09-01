@@ -62,10 +62,11 @@ help [topic] = do
   hPutStrLn stderr $ "unknown help topic " ++ show topic ++ ". Run 'psla help'."
   exitFailure
 help _ = do
-  putStrLn . unlines $ [ "usage: psla help command"
-                       , ""
-                       , "Too many arguments given."
-                       ]
+  hPutStrLn stderr $
+            unlines [ "usage: psla help command"
+                    , ""
+                    , "Too many arguments given."
+                    ]
   exitFailure
 
 data Flag =
