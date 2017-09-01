@@ -90,11 +90,11 @@ installFlags = do
 parseFlag :: State [String] (Maybe Flag) -> State [String] [Flag]
 parseFlag s = do
   flag <- s
-  case flag of
-    Just x -> do
-      xs <- parseFlag s
-      return $ x:xs
-    Nothing -> return []
+  maybe (return []) parseRest flag
+    where
+      parseRest x = do
+        xs <- parseFlag s
+        return $ x:xs
 
 install :: [String] -> IO ()
 install [] = fail "install: 1 or more arguments required"
