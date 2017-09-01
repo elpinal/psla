@@ -51,6 +51,7 @@ usage = unlines
           , "        install      download and compile the specific version of Python"
           , "        uninstall    uninstall the specific version of Python"
           , "        use          select the specific version of Python as cureent version"
+          , "        list         list up installed versions"
           , "        help         show help"
           , ""
           ]
