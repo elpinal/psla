@@ -100,7 +100,7 @@ install args = do
   (flags, versions) <- runState $ parseFlag installFlags args
   _ <- createDirectoryIfMissing True <$> (combine <$> rootPath <*> return "repo")
   mapM_ clone versions
-  mapM_ ( build flags ) versions
+  mapM_ (build flags) versions
 
 clone :: String -> IO ()
 clone version = do
