@@ -107,10 +107,13 @@ install args = do
   mapM_ clone versions
   mapM_ (build flags) versions
 
+getDest :: String -> IO FilePath
+  root <- getRootPath
+  return $ foldl1 combine [root, "repo", version]
+
 clone :: String -> IO ()
 clone version = do
-  root <- getRootPath
-  let dest = foldl1 combine [root, "repo", version]
+  dest <- getDest version
   doesNotExists <- not <$> doesDirectoryExist dest
   when doesNotExists $
        callProcess "git" ["clone", "--depth", "1", "--branch", version, repoURI, dest]
@@ -118,7 +121,7 @@ clone version = do
 build :: [Flag] -> String -> IO ()
 build flags version = do
   root <- getRootPath
-  let dest = foldl1 combine [root, "repo", version]
+  dest <- getDest version
   forM_ [ (dest </> "configure", configOpt ++ frameworkOpt root ++ ["--prefix", foldl1 combine [root, "python", version]])
         , ("make", ["-k", "-j4"])
         , ("make", ["install"])
