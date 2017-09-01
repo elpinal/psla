@@ -83,7 +83,9 @@ installFlags = do
     "-framework" -> do
       put xs
       return $ return Framework
-installFlags = return Nothing
+    _ -> do
+      put $ x:xs
+      return Nothing
 
 parseFlag :: State [String] (Maybe Flag) -> State [String] [Flag]
 parseFlag s = do
