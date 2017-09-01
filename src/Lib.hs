@@ -18,8 +18,8 @@ import System.Process
 repoURI :: String
 repoURI = "https://github.com/python/cpython"
 
-rootPath :: IO FilePath
-rootPath = combine <$> getHomeDirectory <*> return ".psla"
+getRootPath :: IO FilePath
+getRootPath = combine <$> getHomeDirectory <*> return ".psla"
 
 run :: IO ()
 run = do
@@ -100,21 +100,21 @@ install :: [String] -> IO ()
 install [] = fail "install: 1 or more arguments required"
 install args = do
   (flags, versions) <- runState $ parseFlag installFlags args
-  root <- rootPath
+  root <- getRootPath
   createDirectoryIfMissing True $ root </> "repo"
   mapM_ clone versions
   mapM_ (build flags) versions
 
 clone :: String -> IO ()
 clone version = do
-  dest <- foldl1 (liftA2 combine) [rootPath, return "repo", return version]
+  dest <- foldl1 (liftA2 combine) [getRootPath, return "repo", return version]
   doesNotExists <- not <$> doesDirectoryExist dest
   when doesNotExists $
        callProcess "git" ["clone", "--depth", "1", "--branch", version, repoURI, dest]
 
 build :: [Flag] -> String -> IO ()
 build flags version = do
-  root <- rootPath
+  root <- getRootPath
   let dest = foldl1 combine [root, "repo", version]
   forM_ [ (dest </> "configure", configOpt ++ frameworkOpt root ++ ["--prefix", foldl1 combine [root, "python", version]])
         , ("make", ["-k", "-j4"])
@@ -139,7 +139,7 @@ build flags version = do
 use :: [String] -> IO ()
 use [] = fail "use: 1 argument required"
 use [version] = do
-  root <- rootPath
+  root <- getRootPath
   exists <- doesFileExist $ root </> "python" </> version </> "bin" </> "python3"
   unless exists $
          fail $ "use: not installed: " ++ show version 
@@ -160,7 +160,7 @@ script root version =
 
 list :: [String] -> IO ()
 list [] = do
-  root <- rootPath
+  root <- getRootPath
   dirs <- listDirectory $ root </> "python"
   mapM_ putStrLn dirs
 list _ = fail "usage: list"
@@ -168,7 +168,7 @@ list _ = fail "usage: list"
 uninstall :: [String] -> IO ()
 uninstall [] = fail "usage: psla uninstall versions..."
 uninstall versions = do
-  root <- rootPath
+  root <- getRootPath
   forM_ versions (\v -> forM_ ["repo", "python", "frameworks", "user"]
                               (\dir -> removeDirectoryRecursive ( root  </> dir  </> v )
                                        `catch`
