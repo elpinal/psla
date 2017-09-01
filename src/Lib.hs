@@ -101,13 +101,14 @@ parseFlag s = do
 install :: [String] -> IO ()
 install [] = failWith "install: 1 or more arguments required"
 install args = do
-  (flags, versions) <- runState $ parseFlag installFlags args
+  let (flags, versions) = runState (parseFlag installFlags) args
   root <- getRootPath
   createDirectoryIfMissing True $ root </> "repo"
   mapM_ clone versions
   mapM_ (build flags) versions
 
 getDest :: String -> IO FilePath
+getDest version = do
   root <- getRootPath
   return $ foldl1 combine [root, "repo", version]
 
