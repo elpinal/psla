@@ -73,21 +73,21 @@ help _ =
 data Flag =
     Config String
   | Framework
-    deriving Show
+    deriving (Eq, Ord, Show)
 
 installFlags :: State [String] (Maybe Flag)
 installFlags = do
   x : xs <- get
-  return $ case x of
+  case x of
     "-config" -> do
       put $ tail xs
-      return $ Config $ head xs
+      return $ return $ Config $ head xs
     "-framework" -> do
       put xs
-      return Framework
+      return $ return Framework
     _ -> do
       put $ x:xs
-      Nothing
+      return Nothing
 
 parseFlag :: State [String] (Maybe Flag) -> State [String] [Flag]
 parseFlag s = do
