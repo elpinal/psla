@@ -26,6 +26,9 @@ run = do
   args <- getArgs
   parseArgs args
 
+fail :: String -> IO ()
+fail msg = hPutStrLn stderr msg >> exitFailure
+
 parseArgs :: [String] -> IO ()
 parseArgs [] = putStrLn usage >> exitFailure
 parseArgs (name:args) = cmd name args
@@ -35,9 +38,7 @@ parseArgs (name:args) = cmd name args
     cmd "use" = use
     cmd "list" = list
     cmd "uninstall" = uninstall
-    cmd x = \_ -> do
-      hPutStrLn stderr $ "psla: no such command " ++ show x
-      exitFailure
+    cmd x = \_ -> fail $ "psla: no such command " ++ show x
 
 usage :: String
 usage = unlines 
@@ -58,16 +59,12 @@ help ["install"] = putStrLn "usage: psla install versions..."
 help ["uninstall"] = putStrLn "usage: psla uninstall versions..."
 help ["use"] = putStrLn "usage: psla use version"
 help ["list"] = putStrLn "usage: psla list"
-help [topic] = do
-  hPutStrLn stderr $ "unknown help topic " ++ show topic ++ ". Run 'psla help'."
-  exitFailure
-help _ = do
-  hPutStrLn stderr $
-            unlines [ "usage: psla help command"
-                    , ""
-                    , "Too many arguments given."
-                    ]
-  exitFailure
+help [topic] = fail $ "unknown help topic " ++ show topic ++ ". Run 'psla help'."
+help _ =
+  fail $ unlines [ "usage: psla help command"
+                 , ""
+                 , "Too many arguments given."
+                 ]
 
 data Flag =
     Config String
@@ -96,7 +93,7 @@ parseFlag s = do
     Nothing -> parseFlag s
 
 install :: [String] -> IO ()
-install [] = hPutStrLn stderr "install: 1 or more arguments required" >> exitFailure
+install [] = fail "install: 1 or more arguments required"
 install args = do
   (flags, versions) <- runState $ parseFlag installFlags args
   _ <- createDirectoryIfMissing True <$> (combine <$> rootPath <*> return "repo")
@@ -135,18 +132,18 @@ build flags version = do
            []
 
 use :: [String] -> IO ()
-use [] = hPutStrLn stderr "use: 1 argument required" >> exitFailure
+use [] = fail "use: 1 argument required"
 use [version] = do
   root <- rootPath
   exists <- doesFileExist $ root </> "python" </> version </> "bin" </> "python3"
   unless exists $
-         hPutStrLn stderr ( "use: not installed: " ++ show version ) >> exitFailure
+         fail $ "use: not installed: " ++ show version 
   createDirectoryIfMissing True $ root </> "bin"
   let dest = root  </> "bin"  </> "python"
   writeFile dest $ script root version
   perm <- getPermissions dest
   setPermissions dest $ setOwnerExecutable True perm
-use _ = hPutStrLn stderr "use: too many arguments" >> exitFailure
+use _ = fail "use: too many arguments"
 
 script :: String -> String -> String
 script root version =
@@ -161,10 +158,10 @@ list [] = do
   root <- rootPath
   dirs <- listDirectory $ root </> "python"
   mapM_ putStrLn dirs
-list _ = hPutStrLn stderr "usage: list" >> exitFailure
+list _ = fail "usage: list"
 
 uninstall :: [String] -> IO ()
-uninstall [] = hPutStrLn stderr "usage: psla uninstall versions..." >> exitFailure
+uninstall [] = fail "usage: psla uninstall versions..."
 uninstall versions = do
   root <- rootPath
   forM_ versions (\v -> forM_ ["repo", "python", "frameworks", "user"]
