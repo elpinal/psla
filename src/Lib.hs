@@ -146,7 +146,7 @@ use :: [String] -> IO ()
 use [] = fail "use: 1 argument required"
 use [version] = do
   root <- getRootPath
-  exists <- doesFileExist $ root </> "python" </> version </> "bin" </> "python3"
+  exists <- doesFileExist $ foldl1 combine [root, "python", version, "bin", "python3"]
   unless exists $
          fail $ "use: not installed: " ++ show version 
   createDirectoryIfMissing True $ root </> "bin"
@@ -160,8 +160,8 @@ script :: String -> String -> String
 script root version =
   unlines [ "#!/bin/sh"
           , ""
-          , "export PYTHONUSERBASE=" ++ show ( root </> "user" </> version )
-          , show ( root  </> "python"  </> version  </> "bin"  </> "python3" ) ++ " \"$@\""
+          , "export PYTHONUSERBASE=" ++ show (root </> "user" </> version)
+          , show (foldl1 combine [root, "python", version, "bin", "python3"]) ++ " \"$@\""
           ]
 
 list :: [String] -> IO ()
