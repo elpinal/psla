@@ -23,7 +23,7 @@ rootPath = combine <$> getHomeDirectory <*> return ".psla"
 
 run :: IO ()
 run = do
-  args <-getArgs
+  args <- getArgs
   parseArgs args
 
 parseArgs :: [String] -> IO ()
@@ -62,11 +62,11 @@ help [topic] = do
   hPutStrLn stderr $ "unknown help topic " ++ show topic ++ ". Run 'psla help'."
   exitFailure
 help _ = do
-         putStrLn . unlines $ [ "usage: psla help command"
-                              , ""
-                              , "Too many arguments given."
-                              ]
-         exitFailure
+  putStrLn . unlines $ [ "usage: psla help command"
+                       , ""
+                       , "Too many arguments given."
+                       ]
+  exitFailure
 
 data Flag =
     Config String
@@ -97,10 +97,10 @@ parseFlag s = do
 install :: [String] -> IO ()
 install [] = hPutStrLn stderr "install: 1 or more arguments required" >> exitFailure
 install args = do
-        (flags, versions) <- runState $ parseFlag installFlags args
-        _ <- createDirectoryIfMissing True <$> (combine <$> rootPath <*> return "repo")
-        mapM_ clone versions
-        mapM_ ( build flags ) versions
+  (flags, versions) <- runState $ parseFlag installFlags args
+  _ <- createDirectoryIfMissing True <$> (combine <$> rootPath <*> return "repo")
+  mapM_ clone versions
+  mapM_ ( build flags ) versions
 
 clone :: String -> IO ()
 clone version = do
@@ -118,20 +118,21 @@ build flags version = do
         , ("make", ["install"])
         ]
         (\(cmd, args) -> do
-        (_,_,_,ph) <- createProcess (proc cmd args){ cwd = Just dest }
-        code <- waitForProcess ph
-        when (code  /= ExitSuccess)
-             exitFailure
+          (_,_,_,ph) <- createProcess (proc cmd args){ cwd = Just dest }
+          code <- waitForProcess ph
+          when (code /= ExitSuccess)
+               exitFailure
         )
   where
        isConfig (Config _) = True
        isConfig _ = False
        fromConfig (Config x) = x
        configOpt = map fromConfig $ filter isConfig flags
-       frameworkOpt root = if Framework `elem` flags then
-                             [( "--enable-framework=" ++ ( root </> "frameworks" </> version ) )]
-                           else
-                             []
+       frameworkOpt root =
+         if Framework `elem` flags then
+           [("--enable-framework=" ++ (root </> "frameworks" </> version))]
+         else
+           []
 
 use :: [String] -> IO ()
 use [] = hPutStrLn stderr "use: 1 argument required" >> exitFailure
@@ -148,16 +149,18 @@ use [version] = do
 use _ = hPutStrLn stderr "use: too many arguments" >> exitFailure
 
 script :: String -> String -> String
-script root version = unlines [ "#!/bin/sh"
-                              , ""
-                              , "export PYTHONUSERBASE=" ++ show ( root </> "user" </> version )
-                              , show ( root  </> "python"  </> version  </> "bin"  </> "python3" ) ++ " \"$@\""]
+script root version =
+  unlines [ "#!/bin/sh"
+          , ""
+          , "export PYTHONUSERBASE=" ++ show ( root </> "user" </> version )
+          , show ( root  </> "python"  </> version  </> "bin"  </> "python3" ) ++ " \"$@\""
+          ]
 
 list :: [String] -> IO ()
 list [] = do
-          root <- rootPath
-          dirs <- listDirectory $ root </> "python"
-          mapM_ putStrLn dirs
+  root <- rootPath
+  dirs <- listDirectory $ root </> "python"
+  mapM_ putStrLn dirs
 list _ = hPutStrLn stderr "usage: list" >> exitFailure
 
 uninstall :: [String] -> IO ()
