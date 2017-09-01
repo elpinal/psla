@@ -94,7 +94,7 @@ parseFlag s = do
     Just x -> do
       xs <- parseFlag s
       return $ x:xs
-    Nothing -> parseFlag s
+    Nothing -> return []
 
 install :: [String] -> IO ()
 install [] = fail "install: 1 or more arguments required"
