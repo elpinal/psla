@@ -76,16 +76,16 @@ data Flag =
 installFlags :: State [String] (Maybe Flag)
 installFlags = do
   x : xs <- get
-  case x of
+  return $ case x of
     "-config" -> do
       put $ tail xs
-      return $ return $ Config $ head xs
+      return $ Config $ head xs
     "-framework" -> do
       put xs
-      return $ return Framework
+      return Framework
     _ -> do
       put $ x:xs
-      return Nothing
+      Nothing
 
 parseFlag :: State [String] (Maybe Flag) -> State [String] [Flag]
 parseFlag s = do
