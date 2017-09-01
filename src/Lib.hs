@@ -55,11 +55,13 @@ usage = unlines
 
 help :: [String] -> IO ()
 help [] = putStrLn usage
-help ["install"] = putStrLn "usage: psla install versions..."
-help ["uninstall"] = putStrLn "usage: psla uninstall versions..."
-help ["use"] = putStrLn "usage: psla use version"
-help ["list"] = putStrLn "usage: psla list"
-help [topic] = fail $ "unknown help topic " ++ show topic ++ ". Run 'psla help'."
+help [topic] = helpOf topic
+  where
+    helpOf "install" = putStrLn "usage: psla install versions..."
+    helpOf "uninstall" = putStrLn "usage: psla uninstall versions..."
+    helpOf "use" = putStrLn "usage: psla use version"
+    helpOf "list" = putStrLn "usage: psla list"
+    helpOf topic = fail $ "unknown help topic " ++ show topic ++ ". Run 'psla help'."
 help _ =
   fail $ unlines [ "usage: psla help command"
                  , ""
