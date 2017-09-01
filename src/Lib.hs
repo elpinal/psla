@@ -28,8 +28,8 @@ run = do
   args <- getArgs
   parseArgs args
 
-fail :: String -> IO ()
-fail msg = hPutStrLn stderr msg >> exitFailure
+failWith :: String -> IO ()
+failWith msg = hPutStrLn stderr msg >> exitFailure
 
 parseArgs :: [String] -> IO ()
 parseArgs [] = putStrLn usage >> exitFailure
@@ -40,7 +40,7 @@ parseArgs (name:args) = cmd name args
     cmd "use" = use
     cmd "list" = list
     cmd "uninstall" = uninstall
-    cmd x = \_ -> fail $ "psla: no such command " ++ show x
+    cmd x = \_ -> failWith $ "psla: no such command " ++ show x
 
 usage :: String
 usage = unlines 
@@ -63,9 +63,9 @@ help [topic] = helpOf topic
     helpOf "uninstall" = putStrLn "usage: psla uninstall versions..."
     helpOf "use" = putStrLn "usage: psla use version"
     helpOf "list" = putStrLn "usage: psla list"
-    helpOf topic = fail $ "unknown help topic " ++ show topic ++ ". Run 'psla help'."
+    helpOf topic = failWith $ "unknown help topic " ++ show topic ++ ". Run 'psla help'."
 help _ =
-  fail $ unlines [ "usage: psla help command"
+  failWith $ unlines [ "usage: psla help command"
                  , ""
                  , "Too many arguments given."
                  ]
@@ -99,7 +99,7 @@ parseFlag s = do
         return $ x:xs
 
 install :: [String] -> IO ()
-install [] = fail "install: 1 or more arguments required"
+install [] = failWith "install: 1 or more arguments required"
 install args = do
   (flags, versions) <- runState $ parseFlag installFlags args
   root <- getRootPath
@@ -143,18 +143,18 @@ build flags version = do
              exitFailure
 
 use :: [String] -> IO ()
-use [] = fail "use: 1 argument required"
+use [] = failWith "use: 1 argument required"
 use [version] = do
   root <- getRootPath
   exists <- doesFileExist $ foldl1 combine [root, "python", version, "bin", "python3"]
   unless exists $
-         fail $ "use: not installed: " ++ show version 
+         failWith $ "use: not installed: " ++ show version
   createDirectoryIfMissing True $ root </> "bin"
   let dest = root  </> "bin"  </> "python"
   writeFile dest $ script root version
   perm <- getPermissions dest
   setPermissions dest $ setOwnerExecutable True perm
-use _ = fail "use: too many arguments"
+use _ = failWith "use: too many arguments"
 
 script :: String -> String -> String
 script root version =
@@ -169,10 +169,10 @@ list [] = do
   root <- getRootPath
   dirs <- listDirectory $ root </> "python"
   mapM_ putStrLn dirs
-list _ = fail "usage: list"
+list _ = failWith "usage: list"
 
 uninstall :: [String] -> IO ()
-uninstall [] = fail "usage: psla uninstall versions..."
+uninstall [] = failWith "usage: psla uninstall versions..."
 uninstall versions = do
   mapM_ remove versions
     where
