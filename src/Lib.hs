@@ -152,7 +152,7 @@ use [version] = do
   unless exists $
          failWith $ "use: not installed: " ++ show version
   createDirectoryIfMissing True $ root </> "bin"
-  let dest = root  </> "bin"  </> "python"
+  let dest = root </> "bin" </> "python"
   writeFile dest $ script root version
   perm <- getPermissions dest
   setPermissions dest $ setOwnerExecutable True perm
