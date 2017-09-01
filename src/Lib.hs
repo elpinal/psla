@@ -122,16 +122,11 @@ build :: [Flag] -> String -> IO ()
 build flags version = do
   root <- getRootPath
   dest <- getDest version
-  forM_ [ (dest </> "configure", configOpt ++ frameworkOpt root ++ ["--prefix", foldl1 combine [root, "python", version]])
+  mapM_ (exec dest)
+        [ (dest </> "configure", configOpt ++ frameworkOpt root ++ ["--prefix", foldl1 combine [root, "python", version]])
         , ("make", ["-k", "-j4"])
         , ("make", ["install"])
         ]
-        (\(cmd, args) -> do
-          (_,_,_,ph) <- createProcess (proc cmd args){ cwd = Just dest }
-          code <- waitForProcess ph
-          when (code /= ExitSuccess)
-               exitFailure
-        )
   where
        getConfig (Config x) = Just x
        getConfig _ = Nothing
@@ -141,6 +136,12 @@ build flags version = do
            [("--enable-framework=" ++ (root </> "frameworks" </> version))]
          else
            []
+       exec dest (cmd, args) = do
+         (_, _, _, ph) <- createProcess (proc cmd args){ cwd = Just dest }
+         code <- waitForProcess ph
+         when (code /= ExitSuccess)
+              exitFailure
+        
 
 use :: [String] -> IO ()
 use [] = fail "use: 1 argument required"
