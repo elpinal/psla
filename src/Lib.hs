@@ -170,8 +170,7 @@ list _ = failWith "usage: list"
 
 uninstall :: [String] -> IO ()
 uninstall [] = failWith "usage: psla uninstall versions..."
-uninstall versions = do
-  mapM_ remove versions
+uninstall versions = mapM_ remove versions
     where
       remove v = mapM_ (removeDirs v) ["repo", "python", "frameworks", "user"]
       removeDirs v dir = do
