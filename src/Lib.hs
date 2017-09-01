@@ -28,14 +28,16 @@ run = do
 
 parseArgs :: [String] -> IO ()
 parseArgs [] = putStrLn usage >> exitFailure
-parseArgs ("help":args) = help args
-parseArgs ("install":args) = install args
-parseArgs ("use":args) = use args
-parseArgs ("list":args) = list args
-parseArgs ("uninstall":args) = uninstall args
-parseArgs (x:_) = do
-  hPutStrLn stderr $ "psla: no such command " ++ show x
-  exitFailure
+parseArgs (name:args) = cmd name args
+  where
+    cmd "help" = help
+    cmd "install" = install
+    cmd "use" = use
+    cmd "list" = list
+    cmd "uninstall" = uninstall
+    cmd x = \_ -> do
+      hPutStrLn stderr $ "psla: no such command " ++ show x
+      exitFailure
 
 usage :: String
 usage = unlines 
