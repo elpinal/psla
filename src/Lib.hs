@@ -100,7 +100,8 @@ install :: [String] -> IO ()
 install [] = fail "install: 1 or more arguments required"
 install args = do
   (flags, versions) <- runState $ parseFlag installFlags args
-  createDirectoryIfMissing True <$> (combine <$> rootPath <*> return "repo")
+  root <- rootPath
+  createDirectoryIfMissing True $ root </> "repo"
   mapM_ clone versions
   mapM_ (build flags) versions
 
