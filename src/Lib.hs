@@ -42,8 +42,8 @@ parseArgs (name:args) = cmd name args
     cmd x = \_ -> failWith $ "psla: no such command " ++ show x
 
 usage :: String
-usage = unlines 
-          [ "PSLA is a tool for managing Python environment."
+usage =
+  unlines [ "PSLA is a tool for managing Python environment."
           , ""
           , "Usage:"
           , ""
@@ -65,10 +65,11 @@ help [topic] = helpOf topic
     helpOf "list" = putStrLn "usage: psla list"
     helpOf topic = failWith $ "unknown help topic " ++ show topic ++ ". Run 'psla help'."
 help _ =
-  failWith $ unlines [ "usage: psla help command"
-                 , ""
-                 , "Too many arguments given."
-                 ]
+  failWith $
+    unlines [ "usage: psla help command"
+            , ""
+            , "Too many arguments given."
+            ]
 
 data Flag =
     Config String
