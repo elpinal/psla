@@ -115,8 +115,8 @@ getDest version = do
 clone :: String -> IO ()
 clone version = do
   dest <- getDest version
-  doesNotExists <- not <$> doesDirectoryExist dest
-  when doesNotExists $
+  exists <- doesDirectoryExist dest
+  unless exists $
        callProcess "git" ["clone", "--depth", "1", "--branch", version, repoURI, dest]
 
 build :: [Flag] -> String -> IO ()
