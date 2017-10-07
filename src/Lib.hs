@@ -177,7 +177,7 @@ list _ _ = failWith "usage: list"
 
 uninstall :: FilePath -> [String] -> IO ()
 uninstall _ [] = failWith "usage: psla uninstall versions..."
-uninstall root versions = do
+uninstall root versions =
   mapM_ remove [root </> dir </> v | v <- versions, dir <- ["repo", "python", "frameworks", "user"]]
   where
     remove :: FilePath -> IO ()
