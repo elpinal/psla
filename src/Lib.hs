@@ -170,9 +170,7 @@ script root version =
           ]
 
 list :: FilePath -> [String] -> IO ()
-list root [] = do
-  dirs <- listDirectory $ root </> "python"
-  mapM_ putStrLn dirs
+list root [] = listDirectory (root </> "python") >>= mapM_ putStrLn
 list _ _ = failWith "usage: list"
 
 uninstall :: FilePath -> [String] -> IO ()
