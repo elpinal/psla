@@ -94,6 +94,7 @@ parseFlag s = do
   flag <- s
   maybe (return []) parseRest flag
   where
+    parseRest :: Flag -> State [String] [Flag]
     parseRest x = do
       xs <- parseFlag s
       return $ x:xs
