@@ -91,10 +91,10 @@ parseFlag :: State [String] (Maybe Flag) -> State [String] [Flag]
 parseFlag s = do
   flag <- s
   maybe (return []) parseRest flag
-    where
-      parseRest x = do
-        xs <- parseFlag s
-        return $ x:xs
+  where
+    parseRest x = do
+      xs <- parseFlag s
+      return $ x:xs
 
 install :: [String] -> IO ()
 install [] = failWith "install: 1 or more arguments required"
@@ -126,16 +126,16 @@ build flags version = do
         , ("make", ["-k", "-j4"])
         , ("make", ["install"])
         ]
-    where
-      getConfig (Config x) = Just x
-      getConfig _ = Nothing
-      configOpt = mapMaybe getConfig flags
-      frameworkOpt root = ["--enable-framework=" ++ (root </> "frameworks" </> version) | Framework `elem` flags]
-      exec dest (cmd, args) = do
-        (_, _, _, ph) <- createProcess (proc cmd args){ cwd = Just dest }
-        code <- waitForProcess ph
-        when (code /= ExitSuccess)
-             exitFailure
+  where
+    getConfig (Config x) = Just x
+    getConfig _ = Nothing
+    configOpt = mapMaybe getConfig flags
+    frameworkOpt root = ["--enable-framework=" ++ (root </> "frameworks" </> version) | Framework `elem` flags]
+    exec dest (cmd, args) = do
+      (_, _, _, ph) <- createProcess (proc cmd args){ cwd = Just dest }
+      code <- waitForProcess ph
+      when (code /= ExitSuccess)
+           exitFailure
 
 use :: [String] -> IO ()
 use [] = failWith "use: 1 argument required"
@@ -169,10 +169,10 @@ list _ = failWith "usage: list"
 uninstall :: [String] -> IO ()
 uninstall [] = failWith "usage: psla uninstall versions..."
 uninstall versions = mapM_ remove versions
-    where
-      remove v = mapM_ (removeDirs v) ["repo", "python", "frameworks", "user"]
-      removeDirs v dir = do
-        root <- getRootPath
-        removeDirectoryRecursive (root </> dir </> v)
-          `catch` \e -> unless (isDoesNotExistError e)
-                               (throw e)
+  where
+    remove v = mapM_ (removeDirs v) ["repo", "python", "frameworks", "user"]
+    removeDirs v dir = do
+      root <- getRootPath
+      removeDirectoryRecursive (root </> dir </> v)
+        `catch` \e -> unless (isDoesNotExistError e)
+                             (throw e)
