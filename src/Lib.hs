@@ -155,10 +155,12 @@ use root [version] = do
   unless exists $
          failWith $ "use: not installed: " ++ show version
   createDirectoryIfMissing True $ root </> "bin"
-  let dest = root </> "bin" </> "python"
   writeFile dest $ script root version
   perm <- getPermissions dest
   setPermissions dest $ setOwnerExecutable True perm
+  where
+    dest :: FilePath
+    dest = root </> "bin" </> "python"
 use _ _ = failWith "use: too many arguments"
 
 script :: String -> String -> String
