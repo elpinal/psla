@@ -75,6 +75,10 @@ data Flag =
   | Framework
     deriving (Eq, Ord, Show)
 
+fromConfig :: Flag -> Maybe String
+fromConfig (Config x) = Just x
+fromConfig _ = Nothing
+
 installFlags :: State [String] (Maybe Flag)
 installFlags = either error id <$> runExceptT (get >>= parse)
   where
@@ -130,9 +134,7 @@ build flags version = do
         , ("make", ["install"])
         ]
   where
-    getConfig (Config x) = Just x
-    getConfig _ = Nothing
-    configOpt = mapMaybe getConfig flags
+    configOpt = mapMaybe fromConfig flags
     frameworkOpt root = ["--enable-framework=" ++ (root </> "frameworks" </> version) | Framework `elem` flags]
     exec dest (cmd, args) = do
       (_, _, _, ph) <- createProcess (proc cmd args){ cwd = Just dest }
