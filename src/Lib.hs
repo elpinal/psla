@@ -38,7 +38,7 @@ parseArgs (name:args) = cmd name args
     cmd "use" = use
     cmd "list" = list
     cmd "uninstall" = uninstall
-    cmd x = \_ -> failWith $ "psla: no such command " ++ show x
+    cmd x = const . failWith $ "psla: no such command " ++ show x
 
 usage :: String
 usage =
