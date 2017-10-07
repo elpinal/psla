@@ -2,6 +2,7 @@ module Lib where
 
 import Control.Exception.Safe
 import Control.Monad
+import Control.Monad.Except
 import Control.Monad.State.Lazy
 import Data.Maybe
 import System.Directory
@@ -75,17 +76,18 @@ data Flag =
     deriving (Eq, Ord, Show)
 
 installFlags :: State [String] (Maybe Flag)
-installFlags = do
-  x : xs <- get
-  case x of
-    "-config" -> do
+installFlags = either error id <$> runExceptT (get >>= parse)
+  where
+    parse :: [String] -> ExceptT String (State [String]) (Maybe Flag)
+    parse ("-config" : xs) = do
+      when (null xs) $
+           throwError "-config: need argument"
       put $ tail xs
-      return $ return $ Config $ head xs
-    "-framework" -> do
+      return . Just . Config $ head xs
+    parse ("-framework" : xs) = do
       put xs
-      return $ return Framework
-    _ -> do
-      return Nothing
+      return $ Just Framework
+    parse _ = return Nothing
 
 parseFlag :: State [String] (Maybe Flag) -> State [String] [Flag]
 parseFlag s = do
