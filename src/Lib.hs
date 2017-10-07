@@ -134,8 +134,13 @@ build flags version = do
         , ("make", ["install"])
         ]
   where
+    configOpt :: [String]
     configOpt = mapMaybe fromConfig flags
+
+    frameworkOpt :: FilePath -> [String]
     frameworkOpt root = ["--enable-framework=" ++ (root </> "frameworks" </> version) | Framework `elem` flags]
+
+    exec :: FilePath -> (String, [String]) -> IO ()
     exec dest (cmd, args) = do
       (_, _, _, ph) <- createProcess (proc cmd args){ cwd = Just dest }
       code <- waitForProcess ph
