@@ -183,7 +183,7 @@ uninstall versions = do
   mapM_ remove [root </> dir </> v | v <- versions, dir <- ["repo", "python", "frameworks", "user"]]
   where
     remove :: FilePath -> IO ()
-    remove p = do
-      removeDirectoryRecursive p
-        `catch` \e -> unless (isDoesNotExistError e)
-                             (throw e)
+    remove = flip catch ignoreNotExist . removeDirectoryRecursive
+
+ignoreNotExist :: IOError -> IO ()
+ignoreNotExist = unless . isDoesNotExistError <*> throw
