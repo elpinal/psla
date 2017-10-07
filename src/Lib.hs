@@ -106,35 +106,35 @@ parseFlag s = do
 
 install :: FilePath -> [String] -> IO ()
 install _ [] = failWith "install: 1 or more arguments required"
-install _ args = do
+install root args = do
   let (flags, versions) = runState (parseFlag installFlags) args
-  root <- getRootPath
   createDirectoryIfMissing True $ root </> "repo"
-  mapM_ clone versions
-  mapM_ (build flags) versions
+  mapM_ (clone root) versions
+  mapM_ (build root flags) versions
 
-getDest :: String -> IO FilePath
-getDest version = do
-  root <- getRootPath
-  return $ foldl1 combine [root, "repo", version]
+getDest :: FilePath -> String -> FilePath
+getDest root version = foldl1 combine [root, "repo", version]
 
-clone :: String -> IO ()
-clone version = do
-  dest <- getDest version
+clone :: FilePath -> String -> IO ()
+clone root version = do
   exists <- doesDirectoryExist dest
   unless exists $
          callProcess "git" ["clone", "--depth", "1", "--branch", version, repoURI, dest]
+  where
+    dest :: FilePath
+    dest = getDest root version
 
-build :: [Flag] -> String -> IO ()
-build flags version = do
-  root <- getRootPath
-  dest <- getDest version
+build :: FilePath -> [Flag] -> String -> IO ()
+build root flags version = do
   mapM_ (exec dest)
         [ (dest </> "configure", configOpt ++ frameworkOpt root ++ ["--prefix", foldl1 combine [root, "python", version]])
         , ("make", ["-k", "-j4"])
         , ("make", ["install"])
         ]
   where
+    dest :: FilePath
+    dest = getDest root version
+
     configOpt :: [String]
     configOpt = mapMaybe fromConfig flags
 
@@ -150,8 +150,7 @@ build flags version = do
 
 use :: FilePath -> [String] -> IO ()
 use _ [] = failWith "use: 1 argument required"
-use _ [version] = do
-  root <- getRootPath
+use root [version] = do
   exists <- doesFileExist $ foldl1 combine [root, "python", version, "bin", "python3"]
   unless exists $
          failWith $ "use: not installed: " ++ show version
@@ -171,16 +170,14 @@ script root version =
           ]
 
 list :: FilePath -> [String] -> IO ()
-list _ [] = do
-  root <- getRootPath
+list root [] = do
   dirs <- listDirectory $ root </> "python"
   mapM_ putStrLn dirs
 list _ _ = failWith "usage: list"
 
 uninstall :: FilePath -> [String] -> IO ()
 uninstall _ [] = failWith "usage: psla uninstall versions..."
-uninstall _ versions = do
-  root <- getRootPath
+uninstall root versions = do
   mapM_ remove [root </> dir </> v | v <- versions, dir <- ["repo", "python", "frameworks", "user"]]
   where
     remove :: FilePath -> IO ()
