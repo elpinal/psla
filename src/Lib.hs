@@ -54,7 +54,7 @@ usage =
           , "        install      download and compile the specific version of Python"
           , "        uninstall    uninstall the specific version of Python"
           , "        use          select the specific version of Python as cureent version"
-          , "        list         list up installed versions"
+          , "        list         list installed versions"
           , "        help         show help"
           , ""
           , "Flags:"
