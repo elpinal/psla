@@ -53,6 +53,10 @@ usage =
           , "        list         list up installed versions"
           , "        help         show help"
           , ""
+          , "Flags:"
+          , "        -framework"
+          , "        -config"
+          , ""
           ]
 
 help :: FilePath -> [String] -> IO ()
