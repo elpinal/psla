@@ -110,9 +110,7 @@ parseFlag :: State [String] (Maybe Flag) -> State [String] [Flag]
 parseFlag s = s >>= maybe (return []) parseRest
   where
     parseRest :: Flag -> State [String] [Flag]
-    parseRest x = do
-      xs <- parseFlag s
-      return $ x:xs
+    parseRest x = (x:) <$> parseFlag s
 
 install :: FilePath -> [String] -> IO ()
 install _ [] = failWith "install: 1 or more arguments required"
