@@ -39,7 +39,10 @@ parseArgs root (name:args) = cmd name root args
     cmd "use" = use
     cmd "list" = list
     cmd "uninstall" = uninstall
-    cmd x = \_ _ -> failWith $ "psla: no such command " ++ show x
+    cmd x = nocmd x
+
+nocmd :: String -> a -> b -> IO ()
+nocmd x _ _ = failWith $ "psla: no such command " ++ show x
 
 usage :: String
 usage =
