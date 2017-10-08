@@ -134,13 +134,13 @@ getDest :: FilePath -> String -> FilePath
 getDest root version = foldl1 combine [root, "repo", version]
 
 clone :: FilePath -> [Flag] -> String -> IO ()
-clone root flags version = clone' root version $ uri flags
+clone root = clone' root . uri
   where
     uri :: [Flag] -> String
     uri = fromMaybe repoURI . headMay . mapMaybe fromRepoURI
 
 clone' :: FilePath -> String -> String -> IO ()
-clone' root version uri = do
+clone' root uri version = do
   exists <- doesDirectoryExist dest
   unless exists $
          callProcess "git" ["clone", "--depth", "1", "--branch", version, uri, dest]
