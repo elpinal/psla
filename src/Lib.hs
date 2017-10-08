@@ -1,5 +1,7 @@
 module Lib where
 
+import Safe
+
 import Control.Exception.Safe
 import Control.Monad
 import Control.Monad.Except
@@ -91,6 +93,10 @@ fromConfig :: Flag -> Maybe String
 fromConfig (Config x) = Just x
 fromConfig _ = Nothing
 
+fromRepoURI :: Flag -> Maybe String
+fromRepoURI (RepoURI x) = Just x
+fromRepoURI _ = Nothing
+
 installFlags :: State [String] (Maybe Flag)
 installFlags = either error id <$> runExceptT (get >>= parse)
   where
@@ -121,14 +127,17 @@ install _ [] = failWith "install: 1 or more arguments required"
 install root args = do
   let (flags, versions) = runState (parseFlag installFlags) args
   createDirectoryIfMissing True $ root </> "repo"
-  mapM_ (clone root) versions
+  mapM_ (clone root flags) versions
   mapM_ (build root flags) versions
 
 getDest :: FilePath -> String -> FilePath
 getDest root version = foldl1 combine [root, "repo", version]
 
-clone :: FilePath -> String -> IO ()
-clone = clone' repoURI
+clone :: FilePath -> [Flag] -> String -> IO ()
+clone root flags version = clone' root version $ uri flags
+  where
+    uri :: [Flag] -> String
+    uri = fromMaybe repoURI . headMay . mapMaybe fromRepoURI
 
 clone' :: FilePath -> String -> String -> IO ()
 clone' root version uri = do
