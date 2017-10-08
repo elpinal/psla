@@ -27,7 +27,7 @@ spec = do
       args `shouldBe` []
 
     it "parses flags in args" $ do
-      let xs = ["-config", "conf", "-framework", "arg1", "arg2"]
+      let xs = ["-config", "conf", "-framework", "-repo", "repo_uri", "arg1", "arg2"]
       let (flag, args) = runState (parseFlag installFlags) xs
-      flag `shouldBe` [Config "conf", Framework]
+      flag `shouldBe` [Config "conf", Framework, RepoURI "repo_uri"]
       args `shouldBe` ["arg1", "arg2"]
