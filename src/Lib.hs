@@ -17,9 +17,7 @@ repoURI :: String
 repoURI = "https://github.com/python/cpython"
 
 getRootPath :: IO FilePath
-getRootPath = do
-  home <- getHomeDirectory
-  return $ home </> ".psla"
+getRootPath = flip combine ".psla" <$> getHomeDirectory
 
 run :: IO ()
 run = do
