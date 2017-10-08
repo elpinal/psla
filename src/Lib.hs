@@ -107,9 +107,7 @@ installFlags = either error id <$> runExceptT (get >>= parse)
     parse _ = return Nothing
 
 parseFlag :: State [String] (Maybe Flag) -> State [String] [Flag]
-parseFlag s = do
-  flag <- s
-  maybe (return []) parseRest flag
+parseFlag s = s >>= maybe (return []) parseRest
   where
     parseRest :: Flag -> State [String] [Flag]
     parseRest x = do
