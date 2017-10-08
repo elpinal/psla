@@ -59,8 +59,8 @@ usage =
           , ""
           , "Flags:"
           , ""
-          , "        -framework"
-          , "        -config"
+          , "        -framework   enable framework on macOS"
+          , "        -config      set an argument as a configure's argument"
           , ""
           ]
 
