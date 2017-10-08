@@ -148,7 +148,7 @@ build root flags version = do
     configOpt = mapMaybe fromConfig flags
 
     frameworkOpt :: FilePath -> [String]
-    frameworkOpt root = ["--enable-framework=" ++ (root </> "frameworks" </> version) | Framework `elem` flags]
+    frameworkOpt root = ["--enable-framework=" ++ root </> "frameworks" </> version | Framework `elem` flags]
 
     exec :: FilePath -> (String, [String]) -> IO ()
     exec dest (cmd, args) = do
