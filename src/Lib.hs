@@ -84,6 +84,7 @@ help _ _ =
 data Flag =
     Config String
   | Framework
+  | RepoURI String
     deriving (Eq, Ord, Show)
 
 fromConfig :: Flag -> Maybe String
@@ -102,6 +103,11 @@ installFlags = either error id <$> runExceptT (get >>= parse)
     parse ("-framework" : xs) = do
       put xs
       return $ Just Framework
+    parse ("-repo" : xs) = do
+      when (null xs) $
+           throwError "-repo: need argument"
+      put $ tail xs
+      return . Just . RepoURI $ head xs
     parse _ = return Nothing
 
 parseFlag :: State [String] (Maybe Flag) -> State [String] [Flag]
