@@ -64,6 +64,7 @@ usage =
           , ""
           , "        -config    set an argument as a configure's argument"
           , "        -framework enable framework on macOS"
+          , "        -repo      set an uri for a source repository"
           , ""
           ]
 
